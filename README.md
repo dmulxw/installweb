@@ -201,6 +201,57 @@ npm install && npm run build
 zip -r build.zip build/*
 ```
 
+#### 6. 脚本停止
+
+**问题**：脚本在用户输入域名和邮箱后直接停止，没有继续执行。
+
+**可能原因**：
+- 网络连接问题，无法访问GitHub
+- 指定的Release标签或文件不存在
+- 管道执行时的输入输出冲突
+
+**解决方法**：
+
+**方法1：下载后执行（推荐）**
+```bash
+wget https://raw.githubusercontent.com/dmulxw/installweb/main/installweb.sh
+sudo bash installweb.sh
+```
+
+**方法2：使用命令行参数**
+```bash
+# 跳过交互式输入，直接指定参数
+sudo bash installweb.sh yourdomain.com your@email.com
+```
+
+**方法3：检查文件是否存在**
+```bash
+# 手动检查GitHub Release文件
+curl -I https://github.com/dmulxw/installweb/releases/download/hah/build.zip
+
+# 如果返回404，说明文件不存在，需要：
+# 1. 检查Release标签是否正确
+# 2. 检查文件是否已上传
+# 3. 使用其他可用的标签或文件
+```
+
+**方法4：指定其他Release版本**
+```bash
+# 如果默认的hah标签有问题，可以尝试其他版本
+sudo bash installweb.sh yourdomain.com your@email.com v1.0 build.zip
+```
+
+#### 7. URL检查失败
+
+如果看到"文件不存在或无法访问"的错误：
+
+1. **检查网络连接**
+2. **验证Release文件**：访问 https://github.com/dmulxw/installweb/releases
+3. **使用完整URL**：
+   ```bash
+   sudo bash installweb.sh domain.com email@example.com "" "https://github.com/dmulxw/installweb/releases/download/hah/build.zip"
+   ```
+
 ### 手动部署（备选方案）
 
 如果自动脚本失败，可以手动执行：
