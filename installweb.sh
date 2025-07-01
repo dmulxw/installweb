@@ -142,23 +142,39 @@ info "正在查询域名 $DOMAIN 的DNS解析..."
 # 先尝试使用简单的方法检查域名解析
 DNS_IP=""
 for cmd in "nslookup" "host" "getent"; do
-  case "$cmd" in
-    "nslookup")
-      DNS_IP=$(nslookup "$DOMAIN" 2>/dev/null | grep -A1 "Name:" | grep "Address:" | awk '{print $2}' | head -n1 || echo "")
-      ;;
-    "host")
-      DNS_IP=$(host "$DOMAIN" 2>/dev/null | grep "has address" | awk '{print $4}' | head -n1 || echo "")
-      ;;
-    "getent")
-      DNS_IP=$(getent hosts "$DOMAIN" 2>/dev/null | awk '{print $1}' | head -n1 || echo "")
-      ;;
-  esac
-  [[ -n "$DNS_IP" ]] && break
+  if command -v "$cmd" >/dev/null 2>&1; then
+    case "$cmd" in
+      "nslookup")
+        DNS_IP=$(nslookup "$DOMAIN" 2>/dev/null | grep -A1 "Name:" | grep "Address:" | awk '{print $2}' | head -n1 || echo "")
+        ;;
+      "host")
+        DNS_IP=$(host "$DOMAIN" 2>/dev/null | grep "has address" | awk '{print $4}' | head -n1 || echo "")
+        ;;
+      "getent")
+        DNS_IP=$(getent hosts "$DOMAIN" 2>/dev/null | awk '{print $1}' | head -n1 || echo "")
+        ;;
+    esac
+    [[ -n "$DNS_IP" ]] && break
+  fi
 done
 
 if [[ -z "$DNS_IP" ]]; then
-  warn "⚠️ 无法使用常规方法查询DNS，将在安装依赖后重试"
-  DNS_CHECK_LATER=true
+  warn "⚠️ 无法使用常规方法查询DNS，尝试ping检查..."
+  # 使用ping作为最后的检查方法
+  if ping -c 1 "$DOMAIN" >/dev/null 2>&1; then
+    DNS_IP=$(ping -c 1 "$DOMAIN" 2>/dev/null | grep "PING" | sed -n 's/.*(\([^)]*\)).*/\1/p' || echo "")
+    if [[ -n "$DNS_IP" ]]; then
+      info "通过ping获取域名解析IP: $DNS_IP"
+      [[ "$DNS_IP" != "$PUB_IP" ]] && die "域名未解析到本机 ($DNS_IP != $PUB_IP)"
+      info "✅ 域名解析正确 ($DNS_IP)"
+    else
+      warn "⚠️ 无法通过ping获取IP，将在安装依赖后重试"
+      DNS_CHECK_LATER=true
+    fi
+  else
+    warn "⚠️ 域名无法访问，将在安装依赖后重试"
+    DNS_CHECK_LATER=true
+  fi
 else
   info "域名解析IP: $DNS_IP"
   [[ "$DNS_IP" != "$PUB_IP" ]] && die "域名未解析到本机 ($DNS_IP != $PUB_IP)"
@@ -186,12 +202,19 @@ info "✅ 系统依赖安装完成"
 # 如果之前DNS检查失败，现在重新检查
 if [[ "${DNS_CHECK_LATER:-false}" == "true" ]]; then
   info "🔍 重新检查域名解析..."
-  DNS_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -n1 || echo "")
-  if [[ -z "$DNS_IP" ]]; then
-    # 如果dig还是没有，尝试其他方法
+  DNS_IP=""
+  
+  # 尝试使用dig命令
+  if command -v dig >/dev/null 2>&1; then
+    DNS_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -n1 || echo "")
+  fi
+  
+  # 如果dig失败或不存在，尝试其他方法
+  if [[ -z "$DNS_IP" ]] && command -v nslookup >/dev/null 2>&1; then
     DNS_IP=$(nslookup "$DOMAIN" 2>/dev/null | grep -A1 "Name:" | grep "Address:" | awk '{print $2}' | head -n1 || echo "")
   fi
-  if [[ -z "$DNS_IP" ]]; then
+  
+  if [[ -z "$DNS_IP" ]] && command -v host >/dev/null 2>&1; then
     DNS_IP=$(host "$DOMAIN" 2>/dev/null | grep "has address" | awk '{print $4}' | head -n1 || echo "")
   fi
   
