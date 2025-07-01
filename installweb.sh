@@ -3,20 +3,8 @@
 # HAH DApp 网站一键部署脚本
 # · 部署预编译的前端静态站点
 # · 支持 Ubuntu ≥20.04 / Debian ≥10 / CentOS 8 / Rocky / Alma
-# · 自动安装 nginx + certbot，配置虚拟主机与 SSL    if [ -t 0 ] && [ -t 1 ]; then
-      echo
-      read -rp "请重新输入文件路径 (或输入 'exit' 退出): " NEW_ZIPFILE < /dev/tty
-      if [[ "$NEW_ZIPFILE" == "exit" ]]; then
-        die "用户退出"
-      elif [[ -n "$NEW_ZIPFILE" ]]; then
-        ZIPFILE="$NEW_ZIPFILE"
-        continue
-      else
-        die "文件不存在，部署终止"
-      fi
-    else
-      die "文件不存在，部署终止"
-    fiReleases 下载预构建文件
+# · 自动安装 nginx + certbot，配置虚拟主机与 SSL
+# · 从 GitHub Releases 下载预构建文件
 # 
 # 构建文件来源：https://github.com/dmulxw/installweb/releases/tag/hah
 # 
