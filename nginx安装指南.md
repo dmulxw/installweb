@@ -2,110 +2,212 @@
 
 ## 📦 脚本介绍
 
-提供了两个 Nginx 安装脚本：
+提供了三个不同级别的 Nginx 安装脚本：
 
-1. **`nginx_install.sh`** - 完整版，功能丰富
-2. **`nginx_quick_install.sh`** - 快速版，简单易用
+1. **`nginx_auto_install.sh`** - 全功能版，生产环境推荐
+2. **`nginx_install.sh`** - 标准版，平衡功能与简易性
+3. **`nginx_quick_install.sh`** - 极简版，快速部署
 
 ## 🚀 快速开始
 
-### 方法一：快速安装（推荐）
+### 方法一：极简安装（最简单）
 
 ```bash
-# 下载并执行快速安装脚本
+# 一键快速安装
 curl -fsSL https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_quick_install.sh | sudo bash
 
-# 或者带域名安装
+# 带域名一键安装
 curl -fsSL https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_quick_install.sh | sudo bash -s your-domain.com
 ```
 
-### 方法二：完整安装
+### 方法二：全功能安装（生产环境）
 
 ```bash
-# 下载脚本
+# 下载全功能脚本
+wget https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_auto_install.sh
+
+# 基础安装
+sudo bash nginx_auto_install.sh
+
+# 带域名安装
+sudo bash nginx_auto_install.sh --domain your-domain.com
+
+# 完整安装（含SSL工具）
+sudo bash nginx_auto_install.sh --full --domain your-domain.com --email admin@your-domain.com
+
+# 交互模式
+sudo bash nginx_auto_install.sh --interactive
+```
+
+### 方法三：标准安装
+
+```bash
+# 下载标准脚本
 wget https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_install.sh
 
 # 基本安装
 sudo bash nginx_install.sh
 
-# 带域名安装
-sudo bash nginx_install.sh your-domain.com
-
-# 自定义网站目录
+# 带域名和自定义目录
 sudo bash nginx_install.sh your-domain.com /var/www/custom
 ```
 
 ## 📋 功能对比
 
-| 功能 | 快速版 | 完整版 |
-|------|-------|-------|
-| 自动系统检测 | ✅ | ✅ |
-| 安装 Nginx | ✅ | ✅ |
-| 基本安全配置 | ✅ | ✅ |
-| 性能优化 | ❌ | ✅ |
-| 详细配置 | ❌ | ✅ |
-| 交互式安装 | ❌ | ✅ |
-| 自定义网站目录 | ❌ | ✅ |
-| 详细日志配置 | ❌ | ✅ |
-| 美观的默认页面 | ✅ | ✅ |
+| 功能 | 极简版 | 标准版 | 全功能版 |
+|------|-------|-------|----------|
+| 自动系统检测 | ✅ | ✅ | ✅ |
+| 安装 Nginx | ✅ | ✅ | ✅ |
+| 基本安全配置 | ✅ | ✅ | ✅ |
+| 防火墙配置 | ✅ | ✅ | ✅ |
+| 性能优化 | ❌ | ✅ | ✅ |
+| Certbot SSL | ❌ | ❌ | ✅ |
+| 交互式安装 | ❌ | ❌ | ✅ |
+| 自动SSL申请 | ❌ | ❌ | ✅ |
+| 命令行参数 | 域名 | 域名+目录 | 全参数 |
+| 配置优化 | ❌ | ✅ | ✅ |
+| 详细帮助 | ❌ | ❌ | ✅ |
 
-## 🔧 完整版功能详解
+## 🔧 脚本详细说明
 
-### 1. 系统支持
+### nginx_auto_install.sh (全功能版)
+
+#### 支持的系统
 - Ubuntu ≥ 20.04
 - Debian ≥ 10
-- CentOS 8
+- CentOS 8+
 - Rocky Linux
 - AlmaLinux
 
-### 2. 自动配置
-- ✅ 性能优化设置
-- ✅ Gzip 压缩
+#### 命令行参数
+```bash
+-h, --help              显示帮助信息
+-d, --domain DOMAIN     创建指定域名的虚拟主机
+-e, --email EMAIL       SSL证书邮箱地址
+-f, --full              完整安装(包含certbot等工具)
+-i, --interactive       交互模式
+-s, --sample            创建示例站点
+--no-optimize           跳过配置优化
+```
+
+#### 使用示例
+```bash
+# 基础安装
+sudo bash nginx_auto_install.sh
+
+# 完整安装带域名
+sudo bash nginx_auto_install.sh --domain example.com --email admin@example.com --full
+
+# 交互模式
+sudo bash nginx_auto_install.sh --interactive
+```
+
+#### 自动配置功能
+- ✅ CPU核心数优化
+- ✅ Gzip 压缩优化
 - ✅ 安全头配置
-- ✅ 缓存配置
-- ✅ 防火墙配置
+- ✅ 性能调优
+- ✅ 防火墙自动配置
+- ✅ SSL证书自动申请
+- ✅ 域名解析检查
 
-### 3. 站点管理
-- 自动创建虚拟主机
-- 独立的访问和错误日志
-- SSL 证书支持准备
-- 自定义网站目录
+### nginx_install.sh (标准版)
 
-## 📝 使用示例
+#### 特点
+- 平衡功能与简易性
+- 支持自定义网站目录
+- 基础性能优化
+- 交互式选择
 
-### 基本安装
-```bash
-# 仅安装 Nginx，使用默认配置
-sudo bash nginx_install.sh
-```
-
-### 创建单个站点
-```bash
-# 为 example.com 创建站点
-sudo bash nginx_install.sh example.com
-
-# 自定义网站目录
-sudo bash nginx_install.sh example.com /home/user/website
-```
-
-### 交互式安装
-```bash
-# 运行脚本后选择安装模式
-sudo bash nginx_install.sh
-
-# 会提示选择：
-# 1. 仅安装 Nginx
-# 2. 安装并配置域名
-```
-
-### 快速版安装
+#### 使用示例
 ```bash
 # 基本安装
-curl -fsSL https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_quick_install.sh | sudo bash
+sudo bash nginx_install.sh
 
 # 带域名
-curl -fsSL https://raw.githubusercontent.com/dmulxw/hahdapp/main/nginx_quick_install.sh | sudo bash -s example.com
+sudo bash nginx_install.sh example.com
+
+# 自定义目录
+sudo bash nginx_install.sh example.com /var/www/custom
 ```
+
+### nginx_quick_install.sh (极简版)
+
+#### 特点
+- 快速一键安装
+- 最少的用户交互
+- 自动检测系统
+- 基础配置即用
+
+#### 使用示例
+```bash
+# 快速安装
+sudo bash nginx_quick_install.sh
+
+# 带域名快速安装
+sudo bash nginx_quick_install.sh example.com
+```
+
+## 🎯 脚本选择建议
+
+### 什么时候选择极简版 (nginx_quick_install.sh)
+✅ **适合以下情况**:
+- 快速搭建测试环境
+- 个人项目快速部署
+- 只需要基础的 HTTP 服务
+- 不需要复杂配置
+- 追求最快的安装速度
+
+❌ **不适合以下情况**:
+- 生产环境部署
+- 需要SSL证书的网站
+- 需要性能调优的高流量网站
+
+### 什么时候选择标准版 (nginx_install.sh)
+✅ **适合以下情况**:
+- 中小型网站部署
+- 需要一定的自定义配置
+- 开发环境搭建
+- 需要指定网站目录
+
+❌ **不适合以下情况**:
+- 需要自动SSL证书申请
+- 需要企业级安全配置
+- 大型生产环境
+
+### 什么时候选择全功能版 (nginx_auto_install.sh)
+✅ **适合以下情况**:
+- 🏢 生产环境部署
+- 🔒 需要SSL证书的网站
+- 📈 高性能要求的网站
+- 🔧 需要详细配置控制
+- 🛡️ 需要企业级安全设置
+- 🤖 需要自动化证书管理
+
+❌ **不适合以下情况**:
+- 快速测试
+- 简单的静态网站托管
+
+### 📊 选择流程图
+
+```
+开始部署 Nginx
+     │
+     ▼
+   是生产环境？
+   ├─ 是 ──→ nginx_auto_install.sh (全功能版)
+   │
+   └─ 否 ──→ 需要自定义配置？
+            ├─ 是 ──→ nginx_install.sh (标准版)
+            │
+            └─ 否 ──→ nginx_quick_install.sh (极简版)
+```
+
+### 💡 推荐搭配使用
+
+1. **开发阶段**: 使用极简版快速搭建 → `nginx_quick_install.sh`
+2. **测试阶段**: 使用标准版完善配置 → `nginx_install.sh`
+3. **生产阶段**: 使用全功能版上线 → `nginx_auto_install.sh`
 
 ## 📁 安装后的目录结构
 
@@ -259,60 +361,225 @@ tail -f /var/log/nginx/error.log
 nginx -t
 ```
 
-## 🔧 自定义配置
+## 🔍 常见问题排查
 
-### 添加新站点
+### Q1: 脚本执行时提示权限不足
 ```bash
-# 创建配置文件
-sudo nano /etc/nginx/conf.d/newsite.com.conf
+# 解决方案：使用 sudo 权限执行
+sudo bash nginx_auto_install.sh
+```
 
-# 基本站点配置模板
+### Q2: 系统不被支持的错误
+```bash
+# 检查系统版本
+cat /etc/os-release
+
+# 手动安装依赖
+# Ubuntu/Debian:
+sudo apt-get update && sudo apt-get install -y nginx
+
+# CentOS/RHEL:
+sudo yum install -y epel-release nginx
+```
+
+### Q3: 防火墙阻止访问
+```bash
+# Ubuntu (UFW)
+sudo ufw status
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# CentOS (Firewalld)
+sudo firewall-cmd --list-all
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+
+# 检查 SELinux (CentOS)
+sudo setsebool -P httpd_can_network_connect 1
+```
+
+### Q4: SSL 证书申请失败
+```bash
+# 检查域名解析
+dig +short your-domain.com
+
+# 手动申请证书
+sudo certbot --nginx -d your-domain.com
+
+# 检查 certbot 服务
+sudo systemctl status certbot.timer
+```
+
+### Q5: Nginx 启动失败
+```bash
+# 查看详细错误
+sudo journalctl -u nginx -f
+
+# 检查配置文件
+sudo nginx -t
+
+# 检查端口占用
+sudo netstat -tlnp | grep :80
+```
+
+## 🚀 进阶配置示例
+
+### 高性能站点配置
+```nginx
 server {
     listen 80;
-    server_name newsite.com www.newsite.com;
-    root /var/www/newsite.com;
-    index index.html index.php;
-
-    location / {
-        try_files $uri $uri/ =404;
+    server_name example.com;
+    root /var/www/example.com;
+    
+    # 启用 HTTP/2
+    listen 443 ssl http2;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    
+    # 性能优化
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Vary Accept-Encoding;
+        access_log off;
     }
+    
+    # Gzip 压缩
+    location ~* \.(js|css|html|xml)$ {
+        gzip on;
+        gzip_comp_level 6;
+        gzip_vary on;
+    }
+    
+    # 安全头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+}
+```
+
+### 反向代理配置
+```nginx
+upstream backend {
+    server 127.0.0.1:3000;
+    server 127.0.0.1:3001;
 }
 
-# 创建网站目录
-sudo mkdir -p /var/www/newsite.com
-sudo chown nginx:nginx /var/www/newsite.com
-
-# 测试并重载配置
-sudo nginx -t && sudo systemctl reload nginx
+server {
+    listen 80;
+    server_name api.example.com;
+    
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
-### 性能调优
+### 负载均衡配置
+```nginx
+upstream web_servers {
+    least_conn;
+    server 192.168.1.100:80 weight=3;
+    server 192.168.1.101:80 weight=2;
+    server 192.168.1.102:80 backup;
+}
+
+server {
+    listen 80;
+    server_name load-balanced.example.com;
+    
+    location / {
+        proxy_pass http://web_servers;
+        health_check;
+    }
+}
+```
+
+## 📊 监控和维护
+
+### 日志分析
 ```bash
-# 编辑主配置文件
-sudo nano /etc/nginx/nginx.conf
+# 实时监控访问日志
+sudo tail -f /var/log/nginx/access.log
 
-# 关键配置项
-worker_processes auto;          # CPU 核心数
-worker_connections 1024;       # 每个进程连接数
-keepalive_timeout 65;          # 连接保持时间
-client_max_body_size 100M;     # 最大上传文件大小
+# 分析访问统计
+sudo awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -nr | head -10
+
+# 错误日志监控
+sudo tail -f /var/log/nginx/error.log
 ```
 
-## 🎯 最佳实践
+### 性能监控
+```bash
+# 检查 Nginx 进程
+ps aux | grep nginx
 
-1. **定期备份配置文件**
-2. **使用版本控制管理配置**
-3. **定期更新 Nginx 版本**
-4. **配置日志轮转**
-5. **监控服务器性能**
-6. **定期检查 SSL 证书有效期**
+# 检查连接数
+ss -tuln | grep :80
 
-## 📞 技术支持
+# 检查内存使用
+free -h
 
-如果遇到问题：
-1. 查看 `/var/log/nginx/error.log` 错误日志
-2. 运行 `nginx -t` 检查配置
-3. 检查防火墙和 SELinux 设置
-4. 确认域名 DNS 解析正确
+# 检查磁盘空间
+df -h
+```
 
-使用这些脚本可以快速部署生产就绪的 Nginx 服务器！
+### 自动更新脚本
+```bash
+#!/bin/bash
+# auto-update-nginx.sh
+
+# 更新系统包
+sudo apt-get update -y
+
+# 检查 Nginx 更新
+if [ "$(apt list --upgradable 2>/dev/null | grep nginx)" ]; then
+    echo "发现 Nginx 更新，开始升级..."
+    sudo apt-get upgrade nginx -y
+    sudo systemctl reload nginx
+    echo "Nginx 已更新并重载配置"
+else
+    echo "Nginx 已是最新版本"
+fi
+
+# 检查 SSL 证书
+sudo certbot renew --dry-run
+```
+
+## 🎯 部署检查清单
+
+### 安装后检查
+- [ ] Nginx 服务正常运行 (`systemctl status nginx`)
+- [ ] 配置文件语法正确 (`nginx -t`)
+- [ ] 防火墙规则已配置
+- [ ] 域名解析正确
+- [ ] SSL 证书有效（如适用）
+- [ ] 网站可正常访问
+- [ ] 日志文件权限正确
+
+### 安全检查
+- [ ] 移除不必要的默认配置
+- [ ] 配置安全头
+- [ ] 禁用服务器版本显示
+- [ ] 配置访问限制
+- [ ] 设置适当的文件权限
+- [ ] 启用 HTTPS 重定向
+
+### 性能检查
+- [ ] 启用 Gzip 压缩
+- [ ] 配置静态文件缓存
+- [ ] 优化 worker 进程数
+- [ ] 设置合适的连接超时
+- [ ] 配置日志轮转
+
+---
+
+**提示**: 这三个安装脚本可以满足从开发测试到生产部署的各种需求。选择合适的脚本，让 Nginx 部署变得简单高效！
+
+📧 **技术支持**: 如有问题，请查看错误日志并参考上述排查步骤。
