@@ -139,31 +139,11 @@ PUB_IP=$(curl -s https://ifconfig.me)
 info "服务器公网IP: $PUB_IP"
 
 info "正在查询域名 $DOMAIN 的DNS解析..."
-# 先尝试使用简单的方法检查域名解析
-DNS_IP=""
-for cmd in "nslookup" "host" "getent"; do
-  case "$cmd" in
-    "nslookup")
-      DNS_IP=$(nslookup "$DOMAIN" 2>/dev/null | grep -A1 "Name:" | grep "Address:" | awk '{print $2}' | head -n1 || echo "")
-      ;;
-    "host")
-      DNS_IP=$(host "$DOMAIN" 2>/dev/null | grep "has address" | awk '{print $4}' | head -n1 || echo "")
-      ;;
-    "getent")
-      DNS_IP=$(getent hosts "$DOMAIN" 2>/dev/null | awk '{print $1}' | head -n1 || echo "")
-      ;;
-  esac
-  [[ -n "$DNS_IP" ]] && break
-done
+DNS_IP=$(dig +short "$DOMAIN" | tail -n1)
+info "域名解析IP: ${DNS_IP:-未解析}"
 
-if [[ -z "$DNS_IP" ]]; then
-  warn "⚠️ 无法使用常规方法查询DNS，将在安装依赖后重试"
-  DNS_CHECK_LATER=true
-else
-  info "域名解析IP: $DNS_IP"
-  [[ "$DNS_IP" != "$PUB_IP" ]] && die "域名未解析到本机 ($DNS_IP != $PUB_IP)"
-  info "✅ 域名解析正确 ($DNS_IP)"
-fi
+[[ "${DNS_IP:-}" != "${PUB_IP:-}" ]] && die "域名未解析到本机 (${DNS_IP:-unknown} != ${PUB_IP:-unknown})"
+info "✅ 域名解析正确 ($DNS_IP)"
 echo
 
 # ---------- 安装依赖 ----------
@@ -171,38 +151,17 @@ info "🔧 [步骤 2/5] 安装系统依赖..."
 info "正在更新软件包列表，请稍候..."
 if [[ $OS_FAMILY == debian ]]; then
   apt-get update -y >/dev/null 2>&1
-  info "正在安装 nginx, certbot, curl, unzip, dnsutils..."
-  apt-get install -y curl unzip nginx certbot python3-certbot-nginx dnsutils
+  info "正在安装 nginx, certbot, curl, unzip..."
+  apt-get install -y curl unzip nginx certbot python3-certbot-nginx
 elif [[ $OS_FAMILY == rhel ]]; then
   info "正在安装 EPEL 仓库..."
   dnf install -y epel-release >/dev/null 2>&1
-  info "正在安装 nginx, certbot, curl, unzip, bind-utils..."
-  dnf install -y curl unzip nginx certbot python3-certbot-nginx bind-utils
+  info "正在安装 nginx, certbot, curl, unzip..."
+  dnf install -y curl unzip nginx certbot python3-certbot-nginx
 fi
 info "正在启动 nginx 服务..."
 systemctl enable --now nginx
 info "✅ 系统依赖安装完成"
-
-# 如果之前DNS检查失败，现在重新检查
-if [[ "${DNS_CHECK_LATER:-false}" == "true" ]]; then
-  info "🔍 重新检查域名解析..."
-  DNS_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -n1 || echo "")
-  if [[ -z "$DNS_IP" ]]; then
-    # 如果dig还是没有，尝试其他方法
-    DNS_IP=$(nslookup "$DOMAIN" 2>/dev/null | grep -A1 "Name:" | grep "Address:" | awk '{print $2}' | head -n1 || echo "")
-  fi
-  if [[ -z "$DNS_IP" ]]; then
-    DNS_IP=$(host "$DOMAIN" 2>/dev/null | grep "has address" | awk '{print $4}' | head -n1 || echo "")
-  fi
-  
-  if [[ -n "$DNS_IP" ]]; then
-    info "域名解析IP: $DNS_IP"
-    [[ "$DNS_IP" != "$PUB_IP" ]] && die "域名未解析到本机 ($DNS_IP != $PUB_IP)"
-    info "✅ 域名解析正确 ($DNS_IP)"
-  else
-    die "无法查询域名解析，请确保域名 $DOMAIN 已正确解析到 $PUB_IP"
-  fi
-fi
 echo
 
 # ---------- 下载并解压前端 build ----------

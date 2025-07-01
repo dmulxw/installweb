@@ -329,3 +329,10 @@ zip -r ../build.zip .
 # 测试新的下载链接
 curl -I https://github.com/dmulxw/installweb/releases/download/hah/build.zip
 ```
+
+
+例子：
+curl -fsSL https://raw.githubusercontent.com/dmulxw/installweb/main/installweb.sh | sudo bash
+
+curl -fsSL https://raw.githubusercontent.com/dmulxw/installweb/main/nginx_quick_install.sh | sudo bash
+https://github.com/dmulxw/installweb/releases/download/hah/build.zip
